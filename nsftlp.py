@@ -20,7 +20,7 @@ statusconv = {
 	"open":         "NEW",
 	"upstream":     "CONFIRMED",
 	"wont-fix":     "WONTFIX",
-	"would-accept": "CONFIRMED",
+	"would-accept": "WONTFIX",
 }
 
 sevconv = {
@@ -31,7 +31,7 @@ sevconv = {
 }
 
 def prettydate(date):
-	return subprocess.check_output(['date', '-ud', date, '+%FT%H:%M:%S']).decode()[:-1]
+	return subprocess.check_output(['date', '-ud', date, '+%Y-%m-%dT%H:%M:%SZ']).decode()[:-1]
 
 IDENT_RE = re.compile('([^a-z0-9+.-]|^[+.-])')
 def ident(s):
@@ -77,13 +77,14 @@ for t in sf['tickets']:
 	lp.write('''
 	</tags>''')
 	atch = t['attachments']
-	if atch:
-		t['discussion_thread']['posts'].insert(0, {
-			"author": t['reported_by'],
-			"timestamp": prettydate(t['created_date']),
-			"text": "",
-			"attachments": atch,
-		})
+	
+	t['discussion_thread']['posts'].insert(0, {
+		"author": t['reported_by'],
+		"timestamp": prettydate(t['created_date']),
+		"text": t['description'],
+		"attachments": atch,
+	})
+	
 	for c in t['discussion_thread']['posts']:
 		lp.write('''
 	<comment>
